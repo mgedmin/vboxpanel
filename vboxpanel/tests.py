@@ -2,7 +2,14 @@ import unittest
 
 from pyramid import testing
 
+from . import main
 from . import views
+
+
+class AppTests(unittest.TestCase):
+
+    def test_main(self):
+        app = main({})
 
 
 class ViewTests(unittest.TestCase):
