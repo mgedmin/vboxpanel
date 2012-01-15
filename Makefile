@@ -14,7 +14,7 @@ dist: bin/python
 
 distclean: clean
 	rm -rf bin/ dist/ include/ lib/ vboxpanel.egg-info/ build/
-	rm -f local .coverage
+	rm -f local .coverage tags
 
 lib/python*/site-packages/vboxpanel.egg-link: bin/python setup.py
 	bin/python setup.py develop
