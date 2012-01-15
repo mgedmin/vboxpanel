@@ -1,2 +1,4 @@
+include .gitignore
+include Makefile
 include *.txt *.ini *.cfg *.rst
 recursive-include vboxpanel *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
