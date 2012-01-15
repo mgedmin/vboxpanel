@@ -9,7 +9,7 @@
 
   <ul>
 % for vm in vms:
-    <li>${vm}</li>
+    <li>${vm.name}</li>
 % endfor
   </ul>
 
