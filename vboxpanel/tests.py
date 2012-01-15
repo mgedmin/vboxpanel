@@ -72,7 +72,7 @@ class VboxTests(unittest.TestCase):
         vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
         vm1.extra_data = {}
         vm2 = vbox.VirtualMachine('ie7box', 'uuid2', DummyVirtualBox())
-        vm2.extra_data = {'VBoxInternal/Devices/pcnet/0/LUN#0/Config/vnc/HostPort': 5900}
+        vm2.extra_data = {'VBoxInternal/Devices/pcnet/0/LUN#0/Config/vnc/HostPort': '5900'}
         self.assertEqual(vm1.vnc_port, None)
         self.assertEqual(vm2.vnc_port, 5900)
 

@@ -65,7 +65,11 @@ class VirtualMachine(object):
         # This assumes
         #   1. A native VNC server was installed in the guest
         #   2. Somebody set up guest port mapping with the name 'vnc'
-        return self.extra_data.get('VBoxInternal/Devices/pcnet/0/LUN#0/Config/vnc/HostPort')
+        port = self.extra_data.get('VBoxInternal/Devices/pcnet/0/LUN#0/Config/vnc/HostPort')
+        if port:
+            return int(port)
+        else:
+            return None
 
     @reify
     def extra_data(self):

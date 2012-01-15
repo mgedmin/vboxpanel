@@ -16,7 +16,7 @@
         (${'running' if vm.running else 'not running'})
       </span>
 %     if vm.vnc_port:
-      VNC screen :${vm.vnc_port - 5900}
+      - VNC screen :${vm.vnc_port - 5900}
 %     endif
     </li>
 % endfor
