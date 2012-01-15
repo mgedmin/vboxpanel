@@ -6,6 +6,7 @@ local
 
 # setuptools/distribute droppings
 *.egg-info
+dist/
 
 # Python droppings
 *.pyc
