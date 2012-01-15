@@ -1,7 +1,7 @@
 all: bin/pcreate bin/pserve lib/python*/site-packages/vboxpanel.egg-link bin/nosetests
 
 run: bin/pserve lib/python*/site-packages/vboxpanel.egg-link
-	bin/pserve development.ini
+	bin/pserve development.ini --reload
 
 test: bin/nosetests
 	bin/nosetests
