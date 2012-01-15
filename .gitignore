@@ -3,3 +3,9 @@ bin/
 include/
 lib/
 local
+
+# setuptools/distribute droppings
+*.egg-info
+
+# Python droppings
+*.pyc
