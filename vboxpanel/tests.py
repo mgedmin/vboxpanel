@@ -68,6 +68,22 @@ class VboxTests(unittest.TestCase):
         self.assertTrue(vm1.running)
         self.assertFalse(vm2.running)
 
+    def test_vm_vnc_port(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        vm1.extra_data = {}
+        vm2 = vbox.VirtualMachine('ie7box', 'uuid2', DummyVirtualBox())
+        vm2.extra_data = {'VBoxInternal/Devices/pcnet/0/LUN#0/Config/vnc/HostPort': 5900}
+        self.assertEqual(vm1.vnc_port, None)
+        self.assertEqual(vm2.vnc_port, 5900)
+
+    def test_vm_extra_data(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        def run(*args):
+            self.assertEquals(args, ('VBoxManage', '-q', 'getextradata', 'ie6box', 'enumerate'))
+            return 'Key: key1, Value: 42\nKey: key2, Value: 1,2,3,4\n'
+        vm1.vbox._run = run
+        self.assertEqual(vm1.extra_data, {'key1': '42', 'key2': '1,2,3,4'})
+
 
 class AppTests(unittest.TestCase):
 
@@ -76,6 +92,8 @@ class AppTests(unittest.TestCase):
 
 
 class DummyVirtualBox(object):
+
+    VBoxManage = 'VBoxManage'
 
     def get_username(self):
         return 'buildbot'

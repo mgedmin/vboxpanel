@@ -60,3 +60,24 @@ class VirtualMachine(object):
     def running(self):
         return self.name in self.vbox.running_vm_names
 
+    @reify
+    def vnc_port(self):
+        # This assumes
+        #   1. A native VNC server was installed in the guest
+        #   2. Somebody set up guest port mapping with the name 'vnc'
+        return self.extra_data.get('VBoxInternal/Devices/pcnet/0/LUN#0/Config/vnc/HostPort')
+
+    @reify
+    def extra_data(self):
+        return self._parse_extra_data(self.vbox._run(
+            self.vbox.VBoxManage, '-q', 'getextradata', self.name, 'enumerate'))
+
+    def _parse_extra_data(self, output):
+        extradata = {}
+        rx = re.compile('^Key: ([^,]+), Value: (.*)')
+        for line in output.splitlines():
+            m = rx.match(line)
+            if m is not None:
+                extradata[m.group(1)] = m.group(2)
+        return extradata
+
