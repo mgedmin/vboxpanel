@@ -1,4 +1,6 @@
 import unittest
+import pwd
+import os
 
 from pyramid import testing
 
@@ -13,7 +15,16 @@ class VboxTests(unittest.TestCase):
         v = vbox.VirtualBox()
         self.assertEquals(v.run('echo', 'hello', 'world'), "hello world\n")
 
-    def test_list(self):
+    def test_get_username(self):
+        v = vbox.VirtualBox()
+        username = v.get_username()
+        self.assertEquals(pwd.getpwnam(username).pw_uid, os.getuid())
+
+    def test_get_hostname(self):
+        v = vbox.VirtualBox()
+        self.assertTrue(isinstance(v.get_hostname(), str))
+
+    def test_list_vms(self):
         v = vbox.VirtualBox()
         def run(*args):
             self.assertEquals(args, ('VBoxManage', '-q', 'list', 'vms'))
@@ -33,6 +44,12 @@ class AppTests(unittest.TestCase):
 
 
 class DummyVirtualBox(object):
+
+    def get_username(self):
+        return 'buildbot'
+
+    def get_hostname(self):
+        return 'localhost'
 
     def list_vms(self):
         return [vbox.VirtualMachine(name, '{%s}' % name.encode('hex'), self)

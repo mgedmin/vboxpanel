@@ -4,13 +4,22 @@ Interface with VirtualBox OSE.
 Spawns VBoxManage in a subprocess.  Hacky.  It would be cleaner to use libvirt.
 """
 
-import subprocess
+import os
+import pwd
 import re
+import socket
+import subprocess
 
 
 class VirtualBox(object):
 
     VBoxManage = 'VBoxManage'
+
+    def get_username(self):
+        return pwd.getpwuid(os.getuid()).pw_name
+
+    def get_hostname(self):
+        return socket.getfqdn()
 
     def list_vms(self):
         vms = []
