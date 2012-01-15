@@ -2,11 +2,16 @@
 bin/
 include/
 lib/
+man/
 local
 
-# setuptools/distribute droppings
+# setuptools/distribute/pip droppings
 *.egg-info
 dist/
+build/
 
 # Python droppings
 *.pyc
+
+# Nose tests
+.coverage
