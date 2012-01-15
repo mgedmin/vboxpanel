@@ -9,7 +9,14 @@
 
   <ul>
 % for vm in vms:
-    <li>${vm.name}</li>
+    <li>
+      ${vm.name}
+%     if vm.running:
+ (running)
+%     else:
+ (not running)
+%     endif
+    </li>
 % endfor
   </ul>
 
