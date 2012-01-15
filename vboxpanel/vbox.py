@@ -4,18 +4,26 @@ Interface with VirtualBox OSE.
 Spawns VBoxManage in a subprocess.  Hacky.  It would be cleaner to use libvirt.
 """
 
+import contextlib
+import logging
 import os
 import pwd
 import re
+import shutil
 import socket
 import subprocess
+import tempfile
 
 from pyramid.decorator import reify
+
+
+log = logging.getLogger(__name__)
 
 
 class VirtualBox(object):
 
     VBoxManage = 'VBoxManage'
+    vncsnapshot = 'vncsnapshot'
 
     def get_username(self):
         return pwd.getpwuid(os.getuid()).pw_name
@@ -45,8 +53,9 @@ class VirtualBox(object):
         return vms
 
     def _run(self, *argv):
-        with subprocess.Popen(argv, stdout=subprocess.PIPE).stdout as f:
-            return f.read()
+        p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        return stdout
 
 
 class VirtualMachine(object):
@@ -72,6 +81,13 @@ class VirtualMachine(object):
             return None
 
     @reify
+    def vnc_screen(self):
+        if self.vnc_port and 5900 <= self.vnc_port: # what's the upper limit?
+            return ':%d' % (self.vnc_port - 5900)
+        else:
+            return None
+
+    @reify
     def extra_data(self):
         return self._parse_extra_data(self.vbox._run(
             self.vbox.VBoxManage, '-q', 'getextradata', self.name, 'enumerate'))
@@ -84,4 +100,27 @@ class VirtualMachine(object):
             if m is not None:
                 extradata[m.group(1)] = m.group(2)
         return extradata
+
+    def get_screenshot(self):
+        if not self.vnc_screen:
+            return None
+        try:
+            with temporary_directory(prefix='vboxpanel-vncsnapshot-') as d:
+                filename = os.path.join(d, 'snapshot.jpg')
+                self.vbox._run(self.vbox.vncsnapshot, '-quiet', self.vnc_screen,
+                               filename)
+                with open(filename, 'rb') as f:
+                    return f.read()
+        except OSError, e:
+            log.error('Failed to get VNC snapshot: %s', e)
+            return None
+
+
+@contextlib.contextmanager
+def temporary_directory(prefix='vboxpanel-', suffix=''):
+    d = tempfile.mkdtemp(prefix=prefix, suffix=suffix)
+    try:
+        yield d
+    finally:
+        shutil.rmtree(d)
 

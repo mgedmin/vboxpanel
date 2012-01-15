@@ -76,6 +76,20 @@ class VboxTests(unittest.TestCase):
         self.assertEqual(vm1.vnc_port, None)
         self.assertEqual(vm2.vnc_port, 5900)
 
+    def test_vm_vnc_screen(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        vm1.vnc_port = None
+        vm2 = vbox.VirtualMachine('ie7box', 'uuid2', DummyVirtualBox())
+        vm2.vnc_port = 5900
+        vm3 = vbox.VirtualMachine('ie8box', 'uuid3', DummyVirtualBox())
+        vm3.vnc_port = 5903
+        vm4 = vbox.VirtualMachine('ie9box', 'uuid4', DummyVirtualBox())
+        vm4.vnc_port = 5899
+        self.assertEqual(vm1.vnc_screen, None)
+        self.assertEqual(vm2.vnc_screen, ':0')
+        self.assertEqual(vm3.vnc_screen, ':3')
+        self.assertEqual(vm4.vnc_screen, None)
+
     def test_vm_extra_data(self):
         vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
         def run(*args):
@@ -83,6 +97,31 @@ class VboxTests(unittest.TestCase):
             return 'Key: key1, Value: 42\nKey: key2, Value: 1,2,3,4\n'
         vm1.vbox._run = run
         self.assertEqual(vm1.extra_data, {'key1': '42', 'key2': '1,2,3,4'})
+
+    def test_vm_get_screenshot_no_vnc(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        vm1.vnc_screen = None
+        self.assertEqual(vm1.get_screenshot(), None)
+
+    def test_vm_get_screenshot_failure(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        vm1.vnc_screen = ':5'
+        def run(*args):
+            self.assertEquals(args[:-1], ('vncsnapshot', '-quiet', ':5'))
+            raise OSError('could not take a snapshot: this is a test')
+        vm1.vbox._run = run
+        self.assertEqual(vm1.get_screenshot(), None)
+
+    def test_vm_get_screenshot_success(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        vm1.vnc_screen = ':5'
+        def run(*args):
+            self.assertEquals(args[:-1], ('vncsnapshot', '-quiet', ':5'))
+            with open(args[-1], 'wb') as f:
+                f.write(':)')
+            return ''
+        vm1.vbox._run = run
+        self.assertEqual(vm1.get_screenshot(), ':)')
 
 
 class AppTests(unittest.TestCase):
@@ -94,6 +133,7 @@ class AppTests(unittest.TestCase):
 class DummyVirtualBox(object):
 
     VBoxManage = 'VBoxManage'
+    vncsnapshot = 'vncsnapshot'
 
     def get_username(self):
         return 'buildbot'
