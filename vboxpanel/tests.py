@@ -15,6 +15,10 @@ class VboxTests(unittest.TestCase):
         v = vbox.VirtualBox()
         self.assertEquals(v._run('echo', 'hello', 'world'), "hello world\n")
 
+    def test_run_background(self):
+        v = vbox.VirtualBox()
+        v._run_background('sleep', '1')
+
     def test_get_username(self):
         v = vbox.VirtualBox()
         username = v.get_username()
@@ -138,6 +142,36 @@ class VboxTests(unittest.TestCase):
         vm1.vbox._run = run
         self.assertEqual(vm1.get_screenshot(), ':)')
 
+    def test_vm_suspend(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        def run(*args):
+            self.assertEquals(args, ('VBoxManage', 'controlvm', 'ie6box', 'savestate'))
+            vm1._suspended = True
+            return ''
+        vm1.vbox._run = run
+        vm1.suspend()
+        self.assertTrue(vm1._suspended)
+
+    def test_vm_poweroff(self):
+        vm1 = vbox.VirtualMachine('ie7box', 'uuid2', DummyVirtualBox())
+        def run(*args):
+            self.assertEquals(args, ('VBoxManage', 'controlvm', 'ie7box', 'acpipowerbutton'))
+            vm1._powered_off = True
+            return ''
+        vm1.vbox._run = run
+        vm1.poweroff()
+        self.assertTrue(vm1._powered_off)
+
+    def test_vm_start(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        def run(*args):
+            self.assertEquals(args, ('VBoxHeadless', '-s', 'ie6box'))
+            vm1._started = True
+            return ''
+        vm1.vbox._run_background = run
+        vm1.start()
+        self.assertTrue(vm1._started)
+
 
 class AppTests(unittest.TestCase):
 
@@ -147,7 +181,10 @@ class AppTests(unittest.TestCase):
 
 class DummyVirtualBox(object):
 
+    _actions = [] # intentionally mutable class attribute
+
     VBoxManage = 'VBoxManage'
+    VBoxHeadless = 'VBoxHeadless'
     vncsnapshot = 'vncsnapshot'
 
     def get_username(self):
@@ -181,6 +218,15 @@ class DummyVirtualMachine(object):
     def get_screenshot(self):
         return {'ie6box': ':)'}.get(self.name)
 
+    def suspend(self):
+        self.vbox._actions.append('suspend %s' % self.name)
+
+    def start(self):
+        self.vbox._actions.append('start %s' % self.name)
+
+    def poweroff(self):
+        self.vbox._actions.append('poweroff %s' % self.name)
+
 
 class ViewTests(unittest.TestCase):
 
@@ -189,6 +235,7 @@ class ViewTests(unittest.TestCase):
         self.request = testing.DummyRequest()
         self.orig_vbox = views.VirtualBox
         views.VirtualBox = DummyVirtualBox
+        DummyVirtualBox._actions = []
 
     def tearDown(self):
         views.VirtualBox = self.orig_vbox
@@ -216,4 +263,28 @@ class ViewTests(unittest.TestCase):
         self.assertEqual(response.status_int, 200)
         self.assertEqual(response.content_type, 'image/jpeg')
         self.assertEqual(response.body, ':)')
+
+    def test_vm_action_suspend(self):
+        self.request.POST['name'] = 'ie6box'
+        self.request.POST['SUSPEND'] = ''
+        response = views.vm_action(self.request)
+        self.assertEqual(response.status_int, 302)
+        self.assertEqual(response.location, 'http://example.com')
+        self.assertEqual(DummyVirtualBox._actions, ['suspend ie6box'])
+
+    def test_vm_action_start(self):
+        self.request.POST['name'] = 'ie7box'
+        self.request.POST['START'] = ''
+        response = views.vm_action(self.request)
+        self.assertEqual(response.status_int, 302)
+        self.assertEqual(response.location, 'http://example.com')
+        self.assertEqual(DummyVirtualBox._actions, ['start ie7box'])
+
+    def test_vm_action_poweroff(self):
+        self.request.POST['name'] = 'ie6box'
+        self.request.POST['POWEROFF'] = ''
+        response = views.vm_action(self.request)
+        self.assertEqual(response.status_int, 302)
+        self.assertEqual(response.location, 'http://example.com')
+        self.assertEqual(DummyVirtualBox._actions, ['poweroff ie6box'])
 

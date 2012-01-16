@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 class VirtualBox(object):
 
     VBoxManage = 'VBoxManage'
+    VBoxHeadless = 'VBoxHeadless'
     vncsnapshot = 'vncsnapshot'
 
     def get_username(self):
@@ -60,6 +61,10 @@ class VirtualBox(object):
         p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
         return stdout
+
+    def _run_background(self, *argv):
+        with open('/dev/null', 'w') as devnull:
+            subprocess.Popen(argv, stdout=devnull)
 
 
 class VirtualMachine(object):
@@ -118,6 +123,18 @@ class VirtualMachine(object):
         except (OSError, IOError), e:
             log.error('Failed to get VNC snapshot: %s', e)
             return None
+
+    def suspend(self):
+        self.vbox._run(self.vbox.VBoxManage, 'controlvm', self.name, 'savestate')
+        log.info('Suspended virtual machine %s', self.name)
+
+    def poweroff(self):
+        self.vbox._run(self.vbox.VBoxManage, 'controlvm', self.name, 'acpipowerbutton')
+        log.info('Powered off virtual machine %s', self.name)
+
+    def start(self):
+        self.vbox._run_background(self.vbox.VBoxHeadless, '-s', self.name)
+        log.info('Started virtual machine %s', self.name)
 
 
 @contextlib.contextmanager

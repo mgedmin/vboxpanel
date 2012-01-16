@@ -1,6 +1,7 @@
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPFound
 
 from vboxpanel.vbox import VirtualBox
 
@@ -11,6 +12,19 @@ def vm_list(request):
     return {'username': vbox.get_username(),
             'hostname': vbox.get_hostname(),
             'vms': vbox.list_vms()}
+
+
+@view_config(route_name='home', request_method='POST')
+def vm_action(request):
+    vbox = VirtualBox()
+    vm_name = request.POST['name']
+    if 'SUSPEND' in request.POST:
+        vbox.vms[vm_name].suspend()
+    elif 'POWEROFF' in request.POST:
+        vbox.vms[vm_name].poweroff()
+    elif 'START' in request.POST:
+        vbox.vms[vm_name].start()
+    return HTTPFound(location=request.application_url)
 
 
 @view_config(route_name='screenshot')

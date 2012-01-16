@@ -21,6 +21,16 @@
       <br><img src="${request.route_url('screenshot', name=vm.name)}">
 %         endif
 %     endif
+      <br>
+      <form action="" method="POST">
+        <input type="hidden" name="name" value="${vm.name}">
+%     if vm.running:
+        <input type="submit" name="SUSPEND" value="Suspend">
+        <input type="submit" name="POWEROFF" value="Power Off">
+%     else:
+        <input type="submit" name="START" value="Start">
+%     endif
+      </form>
     </li>
 % endfor
   </ul>
