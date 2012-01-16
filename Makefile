@@ -6,6 +6,10 @@ run: bin/pserve lib/python*/site-packages/vboxpanel.egg-link
 test: bin/nosetests
 	bin/nosetests
 
+update:
+	git pull
+	touch pyramid.wsgi
+
 clean:
 	find -name '*.pyc' -delete
 
