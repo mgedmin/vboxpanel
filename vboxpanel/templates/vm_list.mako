@@ -15,8 +15,9 @@
       <span class="status-${'running' if vm.running else 'not-running'}">
         (${'running' if vm.running else 'not running'})
       </span>
-%     if vm.vnc_port:
+%     if vm.vnc_screen:
       - VNC screen ${vm.vnc_screen}
+      <br><img src="${request.route_url('screenshot', name=vm.name)}">
 %     endif
     </li>
 % endfor

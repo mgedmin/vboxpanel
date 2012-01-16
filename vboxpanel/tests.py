@@ -44,6 +44,12 @@ class VboxTests(unittest.TestCase):
         self.assertEquals(vms[0].vm_id, 'uuid1')
         self.assertEquals(vms[0].vbox, v)
 
+    def test_vms(self):
+        v = vbox.VirtualBox()
+        v.list_vms = DummyVirtualBox().list_vms
+        self.assertEquals(sorted(v.vms), ['ie6box', 'ie7box', 'ie8box'])
+        self.assertEquals(v.vms['ie6box'].name, 'ie6box')
+
     def test_list_running_vms(self):
         v = vbox.VirtualBox()
         def run(*args):
@@ -142,14 +148,29 @@ class DummyVirtualBox(object):
         return 'localhost'
 
     def list_vms(self):
-        return [vbox.VirtualMachine(name, '{%s}' % name.encode('hex'), self)
+        return [DummyVirtualMachine(name, '{%s}' % name.encode('hex'), self)
                 for name in 'ie6box ie7box ie8box'.split()]
 
     def list_running_vms(self):
-        return [vbox.VirtualMachine(name, '{%s}' % name.encode('hex'), self)
+        return [DummyVirtualMachine(name, '{%s}' % name.encode('hex'), self)
                 for name in 'ie6box'.split()]
 
     running_vm_names = set(['ie6box'])
+
+    @property
+    def vms(self):
+        return dict((vm.name, vm) for vm in self.list_vms())
+
+
+class DummyVirtualMachine(object):
+
+    def __init__(self, name, vm_id, vbox):
+        self.name = name
+        self.vm_id = vm_id
+        self.vbox = vbox
+
+    def get_screenshot(self):
+        return {'ie6box': ':)'}.get(self.name)
 
 
 class ViewTests(unittest.TestCase):
@@ -169,4 +190,21 @@ class ViewTests(unittest.TestCase):
         self.assertEqual(info['username'], 'buildbot')
         self.assertEqual(info['hostname'], 'localhost')
         self.assertEqual(len(info['vms']), 3)
+
+    def test_screenshot_bad_vm_name(self):
+        self.request.matchdict['name'] = 'nosuchbox'
+        response = views.screenshot(self.request)
+        self.assertEqual(response.status_int, 404)
+
+    def test_screenshot_vm_no_screenshot(self):
+        self.request.matchdict['name'] = 'ie7box'
+        response = views.screenshot(self.request)
+        self.assertEqual(response.status_int, 404)
+
+    def test_screenshot_vm_screenshot(self):
+        self.request.matchdict['name'] = 'ie6box'
+        response = views.screenshot(self.request)
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(response.content_type, 'image/jpeg')
+        self.assertEqual(response.body, ':)')
 

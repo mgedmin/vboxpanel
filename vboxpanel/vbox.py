@@ -40,6 +40,10 @@ class VirtualBox(object):
             self._run(self.VBoxManage, '-q', 'list', 'runningvms'))
 
     @reify
+    def vms(self):
+        return dict((vm.name, vm) for vm in self.list_vms())
+
+    @reify
     def running_vm_names(self):
         return set(vm.name for vm in self.list_running_vms())
 
