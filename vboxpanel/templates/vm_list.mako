@@ -17,7 +17,9 @@
       </span>
 %     if vm.vnc_screen:
       - VNC screen ${vm.vnc_screen}
+%         if vm.running:
       <br><img src="${request.route_url('screenshot', name=vm.name)}">
+%         endif
 %     endif
     </li>
 % endfor
