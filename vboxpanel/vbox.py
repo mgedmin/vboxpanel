@@ -115,7 +115,7 @@ class VirtualMachine(object):
                                filename)
                 with open(filename, 'rb') as f:
                     return f.read()
-        except OSError, e:
+        except (OSError, IOError), e:
             log.error('Failed to get VNC snapshot: %s', e)
             return None
 

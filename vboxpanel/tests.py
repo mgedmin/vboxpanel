@@ -118,6 +118,15 @@ class VboxTests(unittest.TestCase):
         vm1.vbox._run = run
         self.assertEqual(vm1.get_screenshot(), None)
 
+    def test_vm_get_screenshot_failure2(self):
+        vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
+        vm1.vnc_screen = ':5'
+        def run(*args):
+            self.assertEquals(args[:-1], ('vncsnapshot', '-quiet', ':5'))
+            raise IOError('could not take a snapshot: this is a test')
+        vm1.vbox._run = run
+        self.assertEqual(vm1.get_screenshot(), None)
+
     def test_vm_get_screenshot_success(self):
         vm1 = vbox.VirtualMachine('ie6box', 'uuid1', DummyVirtualBox())
         vm1.vnc_screen = ':5'
