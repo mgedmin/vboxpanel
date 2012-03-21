@@ -6,8 +6,16 @@ run: bin/pserve lib/python*/site-packages/vboxpanel.egg-link
 test: bin/nosetests
 	bin/nosetests
 
+update-all-packages: bin/pip
+	bin/pip install -U nose pyramid pyramid_debugtoolbar waitress
+	make
+
+update-requirements: bin/pip
+	bin/pip freeze | grep -v vboxpanel > requirements.txt
+
 update:
 	git pull
+	make
 	touch pyramid.wsgi
 
 clean:
