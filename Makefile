@@ -11,7 +11,7 @@ update-all-packages: bin/pip
 	make
 
 update-requirements: bin/pip
-	bin/pip freeze | grep -v vboxpanel > requirements.txt
+	PYTHONPATH= bin/pip freeze | grep -v vboxpanel > requirements.txt
 
 update:
 	git pull
