@@ -55,7 +55,7 @@ Here's a sample Apache config::
   WSGIScriptAlias /vboxpanel "/opt/vboxpanel/pyramid.wsgi"
   WSGIDaemonProcess vboxpanel user=buildbot group=buildbot processes=2 threads=5 \
     maximum-requests=1000 umask=0007 display-name=wsgi-vboxpanel \
-    python-path=/opt/vboxpanel/lib/python2.6/site-packages
+    python-path=/opt/vboxpanel/lib/python2.7/site-packages
   WSGIProcessGroup vboxpanel
   WSGIPassAuthorization on
 
