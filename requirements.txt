@@ -11,7 +11,7 @@ pyramid-debugtoolbar==1.0
 repoze.lru==0.4
 translationstring==1.1
 venusian==1.0a3
-waitress==1.4.1
+waitress==1.4.2
 wsgiref==0.1.2
 zope.deprecation==3.5.1
 zope.interface==3.8.0
