@@ -2,7 +2,7 @@ Chameleon==2.8.0
 Mako==0.6.2
 MarkupSafe==0.15
 PasteDeploy==1.5.0
-Pygments==1.5
+Pygments==2.7.4
 WebOb==1.2b3
 distribute==0.6.25
 nose==1.1.2
