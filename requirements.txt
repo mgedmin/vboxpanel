@@ -6,7 +6,7 @@ Pygments==2.7.4
 WebOb==1.6.0a0
 distribute==0.6.25
 nose==1.1.2
-pyramid==1.6a1
+pyramid==1.6a2
 pyramid-debugtoolbar==1.0
 repoze.lru==0.4
 translationstring==1.1
