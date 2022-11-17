@@ -1,17 +1,18 @@
 Chameleon==2.8.0
-Mako==0.6.2
+Mako==1.2.2
 MarkupSafe==0.15
 PasteDeploy==1.5.0
 Pygments==2.7.4
 WebOb==1.6.0a0
 distribute==0.6.25
 nose==1.1.2
-pyramid==1.6a1
+pyramid==1.6a2
 pyramid-debugtoolbar==1.0
 repoze.lru==0.4
 translationstring==1.1
 venusian==1.0a3
-waitress==2.1.1
+waitress==2.1.2
 wsgiref==0.1.2
 zope.deprecation==3.5.1
 zope.interface==3.8.0
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
